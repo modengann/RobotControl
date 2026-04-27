@@ -6,8 +6,8 @@
 #include <WiFi.h>
 #include <ArduinoOTA.h>
 
-const char* WIFI_SSID     = "B&S World 2G";
-const char* WIFI_PASSWORD = "bruceandsoph2022";
+const char* WIFI_SSID     = "N300-EEF9";
+const char* WIFI_PASSWORD = "123456789";
 const char* OTA_PASSWORD  = "password";
 
 void setupOTA() {
