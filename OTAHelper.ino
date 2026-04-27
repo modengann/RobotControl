@@ -9,6 +9,7 @@
 const char* WIFI_SSID     = "N300-EEF9";
 const char* WIFI_PASSWORD = "123456789";
 const char* OTA_PASSWORD  = "password";
+const char* HOSTNAME      = "your-name-robot";
 
 void setupOTA() {
   Serial.print("Connecting to WiFi");
