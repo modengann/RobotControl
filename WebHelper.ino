@@ -29,31 +29,50 @@ const char PAGE[] PROGMEM = R"rawliteral(
       font-family: 'Space Mono', monospace;
       background: #0f0f0f;
       color: #f0f0f0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      text-align: center;
+      padding: 1.2rem;
+      font-size: 0.85rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: #555;
+      border-bottom: 1px solid #1a1a1a;
+    }
+
+    .panels {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+    }
+
+    .key-panel {
+      width: 220px;
+      flex-shrink: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
-      gap: 2rem;
-    }
-
-    h1 {
-      font-size: 1rem;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: #555;
+      gap: 1rem;
+      border-right: 1px solid #222;
+      background: #0d0d0d;
+      padding: 1rem;
     }
 
     #keyDisplay {
-      font-size: 5rem;
+      font-size: 4.5rem;
       font-weight: 700;
-      width: 140px;
-      height: 140px;
+      width: 110px;
+      height: 110px;
       display: flex;
       align-items: center;
       justify-content: center;
       border: 2px solid #333;
-      border-radius: 16px;
+      border-radius: 12px;
       background: #1a1a1a;
       transition: all 0.1s ease;
       color: #f0f0f0;
@@ -62,99 +81,87 @@ const char PAGE[] PROGMEM = R"rawliteral(
     #keyDisplay.active {
       border-color: #4af;
       color: #4af;
-      box-shadow: 0 0 40px #4af3;
+      box-shadow: 0 0 30px #4af3;
     }
 
-    #status {
-      font-size: 0.75rem;
-      color: #444;
-      letter-spacing: 0.1em;
-    }
-
-    #hint {
-      font-size: 0.7rem;
-      color: #333;
-      letter-spacing: 0.08em;
-      text-align: center;
-      max-width: 280px;
-      line-height: 1.8;
-    }
+    #status { font-size: 0.65rem; color: #444; letter-spacing: 0.08em; text-align: center; }
 
     #log {
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       color: #555;
-      width: 280px;
-      height: 80px;
+      width: 180px;
+      height: 100px;
       overflow-y: auto;
-      border: 1px solid #222;
+      border: 1px solid #1c1c1c;
       border-radius: 6px;
-      padding: 0.5rem;
+      padding: 0.4rem;
       display: flex;
       flex-direction: column-reverse;
     }
 
     .log-entry { color: #4af; }
-    .log-entry.stop { color: #555; }
+    .log-entry.stop { color: #2a2a2a; }
 
-    #monitor-label {
+    #hint { font-size: 0.55rem; color: #222; letter-spacing: 0.06em; text-align: center; line-height: 1.7; }
+
+    .monitor-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem 1.2rem;
+      gap: 0.5rem;
+      min-width: 0;
+    }
+
+    .monitor-header {
       font-size: 0.65rem;
-      color: #333;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
-      align-self: flex-start;
-      margin-left: calc(50% - 140px);
+      color: #2a4a2a;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid #1a2e1a;
     }
 
     #monitor {
-      font-size: 0.7rem;
-      color: #7f7;
-      width: 280px;
-      height: 140px;
+      flex: 1;
       overflow-y: auto;
+      font-size: 0.78rem;
+      color: #7f7;
+      background: #0a140a;
       border: 1px solid #1a2e1a;
       border-radius: 6px;
-      padding: 0.5rem;
-      background: #0a140a;
-      display: flex;
-      flex-direction: column;
+      padding: 0.7rem;
     }
 
-    #monitor-status {
-      font-size: 0.6rem;
-      color: #2a4a2a;
-      letter-spacing: 0.08em;
-      align-self: flex-start;
-      margin-left: calc(50% - 140px);
-    }
+    .mon-entry { white-space: pre-wrap; word-break: break-all; line-height: 1.6; }
 
-    .mon-entry { color: #7f7; white-space: pre-wrap; word-break: break-all; }
+    #monitor-status { font-size: 0.6rem; color: #2a4a2a; letter-spacing: 0.08em; }
   </style>
 </head>
 <body>
-  <h1>Robot Control</h1>
+  <header>Robot Control</header>
 
-  <div id="keyDisplay">—</div>
-  <div id="status">ready — press any key</div>
+  <div class="panels">
+    <div class="key-panel">
+      <div id="keyDisplay">—</div>
+      <div id="status">ready — press any key</div>
+      <div id="log"></div>
+      <div id="hint">key down = held<br>key up = stop</div>
+    </div>
 
-  <div id="log"></div>
-
-  <div id="hint">
-    press any key on your keyboard<br>
-    key down = held, key up = "stop"
+    <div class="monitor-panel">
+      <div class="monitor-header">serial monitor</div>
+      <div id="monitor"></div>
+      <div id="monitor-status">connecting...</div>
+    </div>
   </div>
 
-  <div id="monitor-label">serial monitor</div>
-  <div id="monitor"></div>
-  <div id="monitor-status">connecting...</div>
-
   <script>
-    const display    = document.getElementById('keyDisplay');
-    const status     = document.getElementById('status');
-    const log        = document.getElementById('log');
-    const monitor    = document.getElementById('monitor');
-    const monStatus  = document.getElementById('monitor-status');
-
-    // --- key display ---
+    const display   = document.getElementById('keyDisplay');
+    const status    = document.getElementById('status');
+    const log       = document.getElementById('log');
+    const monitor   = document.getElementById('monitor');
+    const monStatus = document.getElementById('monitor-status');
 
     function addLog(key) {
       const entry = document.createElement('div');
@@ -191,8 +198,6 @@ const char PAGE[] PROGMEM = R"rawliteral(
       heldKeys.delete(e.key);
       if (heldKeys.size === 0) sendKey('stop');
     });
-
-    // --- serial monitor via SSE ---
 
     function addMonitorLine(text) {
       const entry = document.createElement('div');
