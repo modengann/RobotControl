@@ -1,5 +1,3 @@
-
-
 void setup() {
   Serial.begin(115200);
   setupOTA();
@@ -9,8 +7,10 @@ void setup() {
 }
 
 void loop() {
+
   handleOTA();
   handleWebServer();
+  delay(20);
 
   
 }
